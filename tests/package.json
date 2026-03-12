@@ -1,0 +1,14 @@
+{
+  "name": "task-manager-e2e-tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test:e2e": "start-server-and-test \"concurrently -k -s first \\\"npm run dev --prefix ../backend\\\" \\\"npm run start --prefix ../frontend -- --host 127.0.0.1\\\"\" \"http://127.0.0.1:3001/health|http://127.0.0.1:3000\" \"node selenium/task-flow.e2e.test.js\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "selenium-webdriver": "^4.30.0",
+    "start-server-and-test": "^2.0.10"
+  }
+}

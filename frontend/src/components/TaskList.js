@@ -32,7 +32,7 @@ const TaskList = ({ tasks, onEditTask }) => {
               statusTasks.map(task => (
                 <TaskCard
                   key={task.id}
-				  task={task}
+                  task={task}
                   onEditTask={onEditTask}
                 />
               ))
