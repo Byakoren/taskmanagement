@@ -34,7 +34,7 @@ projet-gestionnaire-taches/
 └── .github/          # Workflows GitHub Actions
 ```
 
-## 2) DevOps
+## 2. DevOps
 
 ### Configuration CI/CD
 
@@ -63,10 +63,6 @@ Les pipelines GitHub Actions sont dans [.github/workflows/ci.yml](.github/workfl
 - Workflow planifié toutes les 30 minutes
 - Vérification d'un endpoint de santé (healthcheck)
 - Échec du job si le service ne répond pas avec un code HTTP `200`
-
-### Secrets GitHub à configurer
-
-- `HEALTHCHECK_URL` : URL complète de l'endpoint health (ex: `https://mon-api.com/health`)
 
 ### Forking workflow (étapes Git)
 
