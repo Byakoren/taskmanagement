@@ -20,8 +20,8 @@ Application de gestion de tâches
 3. **Organisation des équipes**
    - Attribution des rôles : Tests, DevOps, etc...
        AbdelKrim : Tests
-       Roïssath : Devops
-       Thomas : Github, workflow 
+       Roïssath : Devops, Selenium
+       Thomas : Github, workflow,ESLint
    - Création des issues pour chaque fonctionnalité/tâche/étape
 
    #### Structure technique :
@@ -42,9 +42,9 @@ Pour la partie DevOps, j'ai mis en place trois workflows GitHub Actions : un pou
 
 La CI se lance automatiquement sur les pull requests vers `develop` et `main`.
 
-- côté backend : installation des dépendances, lint avec ESLint, exécution des tests puis génération de la couverture ;
-- côté frontend : installation des dépendances, lint, tests unitaires puis couverture ;
-- les rapports de couverture sont conservés comme artefacts GitHub Actions.
+- côté backend : installation des dépendances, lint avec ESLint puis exécution des tests ;
+- côté frontend : installation des dépendances, lint, tests unitaires, couverture puis vérification du build ;
+- le rapport de couverture frontend est conservé comme artefact GitHub Actions.
 
 Pour cela, une configuration ESLint a été ajoutée dans [backend/.eslintrc.cjs](backend/.eslintrc.cjs) et [frontend/.eslintrc.cjs](frontend/.eslintrc.cjs).
 
@@ -131,10 +131,29 @@ Une configuration ESLint a été ajoutée sur les deux parties du projet :
 - [backend/.eslintrc.cjs](backend/.eslintrc.cjs) : règles backend avec support des globals Jest
 - [frontend/.eslintrc.cjs](frontend/.eslintrc.cjs) : règles frontend avec support des globals Vitest et React
 
+Commandes utiles :
+```bash
+# Frontend
+cd frontend
+npm install
+npm run lint
+npm run lint:fix
+
+# Backend
+cd ../backend
+npm install
+npm run lint
+npm run lint:fix
+```
+
+Cette partie correspond à la demande du projet sur l'analyse de code avec ESLint :
+- vérification automatique du code côté frontend et backend ;
+- exécution locale possible avant commit ;
+- exécution aussi dans la CI avant merge.
+
 ### Couverture de code
 
 La couverture est générée avec les commandes `test:coverage` et conservée comme artefact dans la pipeline CI. Résultats obtenus :
 - Backend : 7 tests passés, ~81.9% de couverture
 - Frontend : 4 tests passés, ~100% sur les composants testés
 - E2E : scénario complet validé (login → création tâche)
-
