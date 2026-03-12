@@ -20,8 +20,8 @@ Application de gestion de tâches
 3. **Organisation des équipes**
    - Attribution des rôles : Tests, DevOps, etc...
        AbdelKrim : Tests
-       Roïssath : Devops
-       Thomas : Github, workflow, tests ESLint
+       Roïssath : Devops, Selenium
+       Thomas : Github, workflow,ESLint
    - Création des issues pour chaque fonctionnalité/tâche/étape
 
    #### Structure technique :
@@ -36,30 +36,102 @@ projet-gestionnaire-taches/
 
 ## 2. DevOps
 
-### Configuration CI/CD
+Pour la partie DevOps, j'ai mis en place trois workflows GitHub Actions : un pour la CI, un pour le déploiement et un pour le monitoring. Ils se trouvent dans [.github/workflows/ci.yml](.github/workflows/ci.yml), [.github/workflows/deploy.yml](.github/workflows/deploy.yml) et [.github/workflows/monitoring.yml](.github/workflows/monitoring.yml).
 
-Les pipelines GitHub Actions sont dans [.github/workflows/ci.yml](.github/workflows/ci.yml), [.github/workflows/deploy.yml](.github/workflows/deploy.yml) et [.github/workflows/monitoring.yml](.github/workflows/monitoring.yml).
+### Intégration continue
 
-#### 1. Intégration Continue (CI)
-- Déclenchement sur PR vers `develop`/`main`
-- Backend :
-   - installation dépendances
-   - `npm run lint` — analyse ESLint ([backend/.eslintrc.cjs](backend/.eslintrc.cjs))
-   - `npm run test` — tests d'intégration API (auth + tasks)
-- Frontend :
-   - installation dépendances
-   - `npm run lint` — analyse ESLint ([frontend/.eslintrc.cjs](frontend/.eslintrc.cjs))
-   - `npm run test -- --run` — tests unitaires composants React
-   - `npm run test:coverage -- --run` — couverture de code
-   - `npm run build` — vérification du build Vite
-- Artifact de couverture frontend uploadé automatiquement.
+La CI se lance automatiquement sur les pull requests vers `develop` et `main`.
 
-#### 2. Analyse de code (ESLint)
-- **Backend** : `eslint:recommended` + globals Jest — [backend/.eslintrc.cjs](backend/.eslintrc.cjs)
-- **Frontend** : `eslint:recommended` + `plugin:react/recommended` + globals Vitest — [frontend/.eslintrc.cjs](frontend/.eslintrc.cjs)
+- côté backend : installation des dépendances, lint avec ESLint puis exécution des tests ;
+- côté frontend : installation des dépendances, lint, tests unitaires, couverture puis vérification du build ;
+- le rapport de couverture frontend est conservé comme artefact GitHub Actions.
 
-Commandes ESLint :
+Pour cela, une configuration ESLint a été ajoutée dans [backend/.eslintrc.cjs](backend/.eslintrc.cjs) et [frontend/.eslintrc.cjs](frontend/.eslintrc.cjs).
 
+Des tests ont aussi été ajoutés pour que la pipeline puisse réellement vérifier le projet :
+
+- backend : [backend/tests/auth.integration.test.js](backend/tests/auth.integration.test.js) et [backend/tests/tasks.integration.test.js](backend/tests/tasks.integration.test.js) ;
+- frontend : [frontend/src/components/Login.unit.test.js](frontend/src/components/Login.unit.test.js) et [frontend/src/components/TaskList.unit.test.js](frontend/src/components/TaskList.unit.test.js).
+
+### Déploiement continu
+
+Le déploiement se fait automatiquement lors d'un push sur `main`. Le workflow construit le frontend avec Vite puis le publie sur GitHub Pages.
+
+### Monitoring
+
+Un workflow de monitoring est exécuté toutes les 30 minutes. Il appelle l'endpoint `/health` du backend et vérifie que le service répond bien avec un code `200`. Pour cela, il faut configurer le secret GitHub `HEALTHCHECK_URL`.
+
+### Workflow Git utilisé
+
+On a travaillé avec un forking workflow : création d'une branche depuis `develop`, développement de la fonctionnalité, push de la branche, puis ouverture d'une pull request vers `develop`. Une fois la branche validée, la mise en production se fait ensuite via `main`.
+
+## 3. Tests et qualité
+
+Trois types de tests ont été mis en place pour couvrir les différentes couches de l'application.
+
+### Tests unitaires (frontend)
+
+Framework : Vitest + React Testing Library
+
+Fichiers :
+- [frontend/src/components/Login.unit.test.js](frontend/src/components/Login.unit.test.js)
+- [frontend/src/components/TaskList.unit.test.js](frontend/src/components/TaskList.unit.test.js)
+
+Lancer les tests :
+```bash
+cd frontend
+npm run test -- --run
+npm run test:coverage -- --run
+```
+
+### Tests d'intégration (backend)
+
+Framework : Jest + Supertest
+
+Fichiers :
+- [backend/tests/auth.integration.test.js](backend/tests/auth.integration.test.js)
+- [backend/tests/tasks.integration.test.js](backend/tests/tasks.integration.test.js)
+
+Lancer les tests :
+```bash
+cd backend
+npm run test -- --runInBand
+npm run test:coverage -- --runInBand
+```
+
+### Tests E2E Selenium
+
+Framework : Selenium WebDriver avec Chrome headless
+
+Fichier : [tests/selenium/task-flow.e2e.test.js](tests/selenium/task-flow.e2e.test.js)
+
+Scénario testé : connexion avec les identifiants admin, navigation vers le dashboard, création d'une tâche, vérification que la tâche apparaît sur le board.
+
+Installation (à faire une seule fois) :
+```bash
+cd tests
+npm install
+```
+
+Lancer le test :
+```bash
+cd tests
+npm run test:e2e
+```
+
+La commande démarre automatiquement le backend sur le port 3001 et le frontend sur le port 3000, attend que les deux serveurs soient prêts, exécute le scénario Selenium, puis arrête les serveurs.
+
+Identifiants utilisés par le test :
+- Email : `admin@test.com`
+- Mot de passe : `password`
+
+### Configuration ESLint
+
+Une configuration ESLint a été ajoutée sur les deux parties du projet :
+- [backend/.eslintrc.cjs](backend/.eslintrc.cjs) : règles backend avec support des globals Jest
+- [frontend/.eslintrc.cjs](frontend/.eslintrc.cjs) : règles frontend avec support des globals Vitest et React
+
+Commandes utiles :
 ```bash
 # Frontend
 cd frontend
@@ -75,33 +147,13 @@ npm run lint:fix
 ```
 
 Cette partie correspond à la demande du projet sur l'analyse de code avec ESLint :
-- vérification automatique du code côté frontend et backend
-- exécution locale possible avant commit
-- exécution aussi dans la CI avant merge
+- vérification automatique du code côté frontend et backend ;
+- exécution locale possible avant commit ;
+- exécution aussi dans la CI avant merge.
 
-#### 3. Tests implémentés
-- **Tests d'intégration backend** :
-   - [backend/tests/auth.integration.test.js](backend/tests/auth.integration.test.js) — login, register, doublons
-   - [backend/tests/tasks.integration.test.js](backend/tests/tasks.integration.test.js) — CRUD complet, authentification requise
-- **Tests unitaires frontend** :
-   - [frontend/src/components/Login.test.js](frontend/src/components/Login.test.js) — soumission du formulaire, gestion des erreurs
-   - [frontend/src/components/TaskList.test.js](frontend/src/components/TaskList.test.js) — colonnes par statut, état vide
+### Couverture de code
 
-#### 4. Déploiement Continu (CD)
-- Déclenchement sur push de `main`
-- Build frontend Vite
-- Déploiement automatique sur GitHub Pages via Actions
-
-#### 5. Monitoring
-- Workflow planifié toutes les 30 minutes
-- Vérification d'un endpoint de santé (healthcheck)
-- Échec du job si le service ne répond pas avec un code HTTP `200`
-- Secret GitHub requis : `HEALTHCHECK_URL`
-
-### Forking workflow (étapes Git)
-
-1. Créer/positionner la branche feature depuis `develop`
-2. Commiter les changements
-3. Pousser la branche
-4. Ouvrir une PR vers `develop`
-5. Après validation, merger ensuite `develop` vers `main`
+La couverture est générée avec les commandes `test:coverage` et conservée comme artefact dans la pipeline CI. Résultats obtenus :
+- Backend : 7 tests passés, ~81.9% de couverture
+- Frontend : 4 tests passés, ~100% sur les composants testés
+- E2E : scénario complet validé (login → création tâche)
