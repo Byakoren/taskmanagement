@@ -30,3 +30,4 @@ projet-gestionnaire-taches/
 ├── README            # Analyse, interprétations, résultats
 └── .github/          # Workflows GitHub Actions
 ```
+
