@@ -21,7 +21,7 @@ Application de gestion de tâches
    - Attribution des rôles : Tests, DevOps, etc...
        AbdelKrim : Tests
        Roïssath : Devops
-       Thomas : Github, workflow 
+       Thomas : Github, workflow, tests ESLint
    - Création des issues pour chaque fonctionnalité/tâche/étape
 
    #### Structure technique :
@@ -46,17 +46,38 @@ Les pipelines GitHub Actions sont dans [.github/workflows/ci.yml](.github/workfl
    - installation dépendances
    - `npm run lint` — analyse ESLint ([backend/.eslintrc.cjs](backend/.eslintrc.cjs))
    - `npm run test` — tests d'intégration API (auth + tasks)
-   - `npm run test:coverage` — couverture de code.
 - Frontend :
    - installation dépendances
    - `npm run lint` — analyse ESLint ([frontend/.eslintrc.cjs](frontend/.eslintrc.cjs))
    - `npm run test -- --run` — tests unitaires composants React
    - `npm run test:coverage -- --run` — couverture de code
-- Artifacts de couverture uploadés automatiquement.
+   - `npm run build` — vérification du build Vite
+- Artifact de couverture frontend uploadé automatiquement.
 
 #### 2. Analyse de code (ESLint)
 - **Backend** : `eslint:recommended` + globals Jest — [backend/.eslintrc.cjs](backend/.eslintrc.cjs)
 - **Frontend** : `eslint:recommended` + `plugin:react/recommended` + globals Vitest — [frontend/.eslintrc.cjs](frontend/.eslintrc.cjs)
+
+Commandes ESLint :
+
+```bash
+# Frontend
+cd frontend
+npm install
+npm run lint
+npm run lint:fix
+
+# Backend
+cd ../backend
+npm install
+npm run lint
+npm run lint:fix
+```
+
+Cette partie correspond à la demande du projet sur l'analyse de code avec ESLint :
+- vérification automatique du code côté frontend et backend
+- exécution locale possible avant commit
+- exécution aussi dans la CI avant merge
 
 #### 3. Tests implémentés
 - **Tests d'intégration backend** :
@@ -84,4 +105,3 @@ Les pipelines GitHub Actions sont dans [.github/workflows/ci.yml](.github/workfl
 3. Pousser la branche
 4. Ouvrir une PR vers `develop`
 5. Après validation, merger ensuite `develop` vers `main`
-
