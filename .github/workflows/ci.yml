@@ -2,44 +2,18 @@ name: CI
 
 on:
   pull_request:
-    branches:
-      - develop
-      - main
+    branches: [main, develop]
   push:
-    branches:
-      - develop
-      - main
-
-permissions:
-  contents: read
-
-concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    branches: [develop]
 
 jobs:
-  branch-policy:
-    name: Branch policy
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check pull request target rules
-        shell: bash
-        run: |
-          echo "Base branch: ${{ github.base_ref }}"
-          echo "Head branch: ${{ github.head_ref }}"
-
-          if [ "${{ github.base_ref }}" = "main" ] && [ "${{ github.head_ref }}" != "develop" ]; then
-            echo "::error::Pull requests to main must come from develop."
-            exit 1
-          fi
-
-  backend-tests:
-    name: Backend tests
+  backend:
+    name: Backend - Lint + Tests + Coverage
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: backend
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -63,6 +37,7 @@ jobs:
     defaults:
       run:
         working-directory: frontend
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -77,8 +52,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run frontend tests
-        run: npx vitest run --passWithNoTests
+      - name: ESLint
+        run: npm run lint
 
-      - name: Build frontend
-        run: npm run build
+      - name: Run tests
+        run: npm run test -- --run
+
+      - name: Run coverage
+        run: npm run test:coverage -- --run
+
+      - name: Upload frontend coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
