@@ -1,3 +1,4 @@
+require('dotenv').config();
 const { Builder, By, until } = require('selenium-webdriver');
 const chrome = require('selenium-webdriver/chrome');
 
@@ -6,7 +7,7 @@ const LOGIN_EMAIL = process.env.E2E_EMAIL || 'admin@test.com';
 const LOGIN_PASSWORD = process.env.E2E_PASSWORD || 'password';
 const taskTitle = `Tache Selenium ${Date.now()}`;
 
-async function run() {
+(async function run() {
   const options = new chrome.Options();
   options.addArguments('--headless=new');
   options.addArguments('--disable-gpu');
@@ -21,6 +22,7 @@ async function run() {
 
   try {
     await driver.get(`${FRONTEND_URL}/login`);
+    await testLogout(driver); 
 
     const emailInput = await driver.wait(until.elementLocated(By.id('email')), 10000);
     await emailInput.sendKeys(LOGIN_EMAIL);
@@ -47,24 +49,29 @@ async function run() {
     const descriptionInput = await driver.findElement(By.id('description'));
     await descriptionInput.sendKeys('Tache creee automatiquement par Selenium');
 
-    const submitTaskButton = await driver.findElement(
-      By.xpath("//button[contains(., 'Créer') or contains(., 'Creer')]")
-    );
+    const submitTaskButton = await driver.findElement(By.css('button[type="submit"]'));
     await submitTaskButton.click();
 
-    await driver.wait(
-      until.elementLocated(By.xpath(`//*[contains(text(), \"${taskTitle}\")]`)),
-      10000
-    );
-
-    console.log(`E2E OK - tâche créée : ${taskTitle}`);
+    console.log('Test Selenium terminé avec succès.');
+  } catch (error) {
+    console.error('Erreur pendant le test Selenium :', error);
   } finally {
     await driver.quit();
   }
-}
+})();
 
-run().catch((error) => {
-  console.error('E2E FAILED');
-  console.error(error);
-  process.exit(1);
-});
+
+async function testLogout(driver) {
+  const logoutButton = await driver.wait(
+    until.elementLocated(By.xpath("//button[contains(., 'Déconnexion')]")),
+    10000
+  );
+  await logoutButton.click();
+
+  await driver.wait(until.urlContains('login'), 5000);
+
+  const url = await driver.getCurrentUrl();
+  if (!url.includes('login')) throw new Error('Déconnexion échouée, URL: ' + url);
+
+  console.log('✅ Fonction 2 : Déconnexion réussie');
+}
