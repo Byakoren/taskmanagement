@@ -34,7 +34,7 @@ projet-gestionnaire-taches/
 └── .github/          # Workflows GitHub Actions
 ```
 
-## 2) DevOps
+## 2. DevOps
 
 ### Configuration CI/CD
 
@@ -44,29 +44,38 @@ Les pipelines GitHub Actions sont dans [.github/workflows/ci.yml](.github/workfl
 - Déclenchement sur PR vers `develop`/`main`
 - Backend :
    - installation dépendances
-   - `npm run lint`
-   - `npm run test`
-   - `npm run test:coverage`
+   - `npm run lint` — analyse ESLint ([backend/.eslintrc.cjs](backend/.eslintrc.cjs))
+   - `npm run test` — tests d'intégration API (auth + tasks)
+   - `npm run test:coverage` — couverture de code.
 - Frontend :
    - installation dépendances
-   - `npm run lint`
-   - `npm run test -- --run`
-   - `npm run test:coverage -- --run`
+   - `npm run lint` — analyse ESLint ([frontend/.eslintrc.cjs](frontend/.eslintrc.cjs))
+   - `npm run test -- --run` — tests unitaires composants React
+   - `npm run test:coverage -- --run` — couverture de code
 - Artifacts de couverture uploadés automatiquement.
 
-#### 2. Déploiement Continu (CD)
+#### 2. Analyse de code (ESLint)
+- **Backend** : `eslint:recommended` + globals Jest — [backend/.eslintrc.cjs](backend/.eslintrc.cjs)
+- **Frontend** : `eslint:recommended` + `plugin:react/recommended` + globals Vitest — [frontend/.eslintrc.cjs](frontend/.eslintrc.cjs)
+
+#### 3. Tests implémentés
+- **Tests d'intégration backend** :
+   - [backend/tests/auth.integration.test.js](backend/tests/auth.integration.test.js) — login, register, doublons
+   - [backend/tests/tasks.integration.test.js](backend/tests/tasks.integration.test.js) — CRUD complet, authentification requise
+- **Tests unitaires frontend** :
+   - [frontend/src/components/Login.test.js](frontend/src/components/Login.test.js) — soumission du formulaire, gestion des erreurs
+   - [frontend/src/components/TaskList.test.js](frontend/src/components/TaskList.test.js) — colonnes par statut, état vide
+
+#### 4. Déploiement Continu (CD)
 - Déclenchement sur push de `main`
 - Build frontend Vite
 - Déploiement automatique sur GitHub Pages via Actions
 
-#### 3. Monitoring
+#### 5. Monitoring
 - Workflow planifié toutes les 30 minutes
 - Vérification d'un endpoint de santé (healthcheck)
 - Échec du job si le service ne répond pas avec un code HTTP `200`
-
-### Secrets GitHub à configurer
-
-- `HEALTHCHECK_URL` : URL complète de l'endpoint health (ex: `https://mon-api.com/health`)
+- Secret GitHub requis : `HEALTHCHECK_URL`
 
 ### Forking workflow (étapes Git)
 
