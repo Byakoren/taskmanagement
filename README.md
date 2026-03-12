@@ -31,3 +31,45 @@ projet-gestionnaire-taches/
 └── .github/          # Workflows GitHub Actions
 ```
 
+## 2) DevOps
+
+### Configuration CI/CD
+
+Les pipelines GitHub Actions sont dans [.github/workflows/ci.yml](.github/workflows/ci.yml), [.github/workflows/deploy.yml](.github/workflows/deploy.yml) et [.github/workflows/monitoring.yml](.github/workflows/monitoring.yml).
+
+#### 1. Intégration Continue (CI)
+- Déclenchement sur PR vers `develop`/`main`
+- Backend :
+   - installation dépendances
+   - `npm run lint`
+   - `npm run test`
+   - `npm run test:coverage`
+- Frontend :
+   - installation dépendances
+   - `npm run lint`
+   - `npm run test -- --run`
+   - `npm run test:coverage -- --run`
+- Artifacts de couverture uploadés automatiquement.
+
+#### 2. Déploiement Continu (CD)
+- Déclenchement sur push de `main`
+- Build frontend Vite
+- Déploiement automatique sur GitHub Pages via Actions
+
+#### 3. Monitoring
+- Workflow planifié toutes les 30 minutes
+- Vérification d'un endpoint de santé (healthcheck)
+- Échec du job si le service ne répond pas avec un code HTTP `200`
+
+### Secrets GitHub à configurer
+
+- `HEALTHCHECK_URL` : URL complète de l'endpoint health (ex: `https://mon-api.com/health`)
+
+### Forking workflow (étapes Git)
+
+1. Créer/positionner la branche feature depuis `develop`
+2. Commiter les changements
+3. Pousser la branche
+4. Ouvrir une PR vers `develop`
+5. Après validation, merger ensuite `develop` vers `main`
+
