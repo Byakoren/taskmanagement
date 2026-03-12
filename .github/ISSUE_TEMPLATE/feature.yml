@@ -1,0 +1,31 @@
+name: Feature
+description: Propose a new feature or a functional improvement
+title: "[FEATURE] "
+labels:
+  - feature
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: Describe the feature to implement.
+      placeholder: Example: Add task filtering by priority on the dashboard.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: List the main implementation points.
+      placeholder: |
+        - Backend changes
+        - Frontend changes
+        - Tests
+    validations:
+      required: true
+  - type: input
+    id: branch-name
+    attributes:
+      label: Suggested branch name
+      description: Create the branch from develop.
+      placeholder: feat/short-description

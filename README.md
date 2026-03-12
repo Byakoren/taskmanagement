@@ -19,6 +19,9 @@ Application de gestion de tâches
 
 3. **Organisation des équipes**
    - Attribution des rôles : Tests, DevOps, etc...
+       AbdelKrim : Tests
+       Roïssath : Devops
+       Thomas : Github, workflow 
    - Création des issues pour chaque fonctionnalité/tâche/étape
 
    #### Structure technique :
