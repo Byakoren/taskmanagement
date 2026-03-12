@@ -46,7 +46,7 @@ Les pipelines GitHub Actions sont dans [.github/workflows/ci.yml](.github/workfl
    - installation dépendances
    - `npm run lint` — analyse ESLint ([backend/.eslintrc.cjs](backend/.eslintrc.cjs))
    - `npm run test` — tests d'intégration API (auth + tasks)
-   - `npm run test:coverage` — couverture de code
+   - `npm run test:coverage` — couverture de code.
 - Frontend :
    - installation dépendances
    - `npm run lint` — analyse ESLint ([frontend/.eslintrc.cjs](frontend/.eslintrc.cjs))
